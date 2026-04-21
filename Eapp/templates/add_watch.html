@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Add Watch — LUXWATCH Seller{% endblock %}
+{% block content %}
+<div style="padding:100px 5% 40px;background:var(--bg);">
+  <span class="section-label">Seller Hub</span>
+  <h1 class="section-heading" style="margin-top:8px;">List a <em>New Watch</em></h1>
+</div>
+<div style="padding:0 5% 80px;">
+  <div class="add-watch-layout">
+    <form class="form-panel" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="font-size:.55rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:28px;">Watch Details</div>
+      <div class="form-row">
+        <div class="form-group"><label>Watch Name *</label><input type="text" name="name" required placeholder="e.g. Obsidian Zenith"></div>
+        <div class="form-group"><label>Brand *</label><input type="text" name="brand" required placeholder="e.g. LUXWATCH"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Price (₹) *</label><input type="number" name="price" required placeholder="124999" min="0"></div>
+        <div class="form-group"><label>Stock Quantity *</label><input type="number" name="stock" required placeholder="5" min="0"></div>
+      </div>
+      <div class="form-group"><label>Category *</label>
+        <select name="category" required>
+          <option value="">Select category</option>
+          <option value="classic">Classic</option>
+          <option value="sport">Sport</option>
+          <option value="limited">Limited Edition</option>
+          <option value="new">New Arrival</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Case Material</label><input type="text" name="material" placeholder="Stainless Steel"></div>
+        <div class="form-group"><label>Movement Type</label>
+          <select name="movement">
+            <option value="">Select</option>
+            <option>Automatic</option>
+            <option>Manual Wind</option>
+            <option>Quartz</option>
+            <option>Solar</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Description *</label><textarea name="description" required placeholder="Describe your timepiece — movement, case, dial, features…" style="min-height:140px;"></textarea></div>
+      <div class="form-group"><label>Watch Image *</label><input type="file" name="image" accept="image/*" required onchange="previewImg(this)" style="color:var(--muted2);"></div>
+      <div class="form-group" style="display:flex;align-items:center;gap:12px;">
+        <input type="checkbox" name="is_featured" id="featured" style="accent-color:var(--gold);width:16px;height:16px;">
+        <label for="featured" style="font-size:.65rem;color:var(--muted2);letter-spacing:.5px;cursor:pointer;margin:0;">Feature this watch on homepage</label>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+        <button type="submit" class="btn-gold">Publish Listing</button>
+        <a href="{% url 'seller_dashboard' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+
+    <div class="form-panel" style="display:flex;flex-direction:column;gap:20px;">
+      <div style="font-size:.55rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Image Preview</div>
+      <div class="upload-zone" id="uploadZone">
+        <img id="previewImage" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
+        <div id="uploadPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+          <div style="font-size:2.5rem;opacity:.2;">📷</div>
+          <p style="font-size:.62rem;color:var(--muted);letter-spacing:1px;text-align:center;">Select an image to preview your listing</p>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);padding:20px;">
+        <div style="font-size:.82rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Listing Tips</div>
+        <ul style="list-style:none;font-size:.85rem;color:var(--muted);line-height:2.2;letter-spacing:.3px;">
+          <li>• Use a clean, well-lit image on a neutral background</li>
+          <li>• Minimum recommended resolution: 800×800px</li>
+          <li>• Include movement type for better searchability</li>
+          <li>• Feature listings appear on the homepage</li>
+          <li>• Set accurate stock to avoid overselling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function previewImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('previewImage').src = e.target.result;
+    document.getElementById('previewImage').style.display = 'block';
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+{% endblock %}
+{% comment %} ----- {% endcomment %}
+

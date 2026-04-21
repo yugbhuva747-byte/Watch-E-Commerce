@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found — LUXWATCH{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 5%;">
+  <div>
+    <div style="font-family:var(--font-d);font-size:8rem;color:var(--gold);opacity:.1;line-height:1;margin-bottom:20px;">404</div>
+    <h1 style="font-family:var(--font-d);font-size:2.5rem;font-weight:300;color:var(--white);margin-bottom:12px;">Page <em style="color:var(--gold);font-style:italic;">Not Found</em></h1>
+    <p style="font-size:.75rem;color:var(--muted);max-width:400px;margin:0 auto 36px;line-height:1.9;letter-spacing:.5px;">The page you're looking for seems to have vanished — like a limited edition piece sold out before you arrived.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <a href="/" class="btn-gold">Back to Home</a>
+      <a href="/products/" class="btn-outline">View Collection</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

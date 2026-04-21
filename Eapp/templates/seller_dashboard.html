@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% block title %}Seller Dashboard — LUXWATCH{% endblock %}
+{% block content %}
+<style>
+.dash-page { display:none; }
+.dash-page.active { display:block; }
+</style>
+
+<div class="dash-layout">
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="dash-sidebar-top">
+      <div class="dash-avatar">{{ user.username|first|upper }}</div>
+      <div style="font-size: 1.500rem;" class="dash-seller-name">{{ user.username }}</div>
+      <div style="font-size: 0.600rem;" class="dash-badge">✓ Verified Seller</div>
+    </div>
+    <nav class="dash-nav">
+      <span style="font-size: 0.800rem;" class="dash-nav-label">Overview</span>
+      <div class="dash-link active" onclick="showPage('overview',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="dash-link" onclick="showPage('orders',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        Orders
+        {% if orders %}<span class="dash-badge-count">{{ orders|length }}</span>{% endif %}
+      </div>
+      <span  style="font-size: 0.800rem;" class="dash-nav-label">Catalogue</span>
+      <div class="dash-link" onclick="showPage('watches',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 01-1.99 1.82H9.83a2 2 0 01-1.99-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 019.83 1h4.33a2 2 0 011.99 1.82l.35 3.83"/></svg>
+        My Watches
+        <span class="dash-badge-count">{{ total_watches }}</span>
+      </div>
+      <a class="dash-link" href="{% url 'add_watch' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add New Watch
+      </a>
+      <span  style="font-size: 0.800rem;" class="dash-nav-label">Account</span>
+      <div style="font-size: 0.800rem;" class="dash-link" onclick="showPage('analytics',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </div>
+      {% if user.role == 'admin' %}
+      <a class="dash-link" href="{% url 'admin_dashboard' %}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Panel
+      </a>
+      {% endif %}
+    </nav>
+    <div class="dash-sidebar-footer">
+      <a href="{% url 'logout' %}" style="font-size:.88rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;transition:color .3s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--muted)'">↖ Sign Out</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+
+    <!-- ── OVERVIEW ── -->
+    <div class="dash-page active" id="page-overview">
+      <div class="dash-topbar">
+        <div><div class="dash-title">Seller <span>Overview</span></div><div class="dash-date" id="dashDate"></div></div>
+        <a href="{% url 'add_watch' %}" class="btn-gold btn-sm">+ Add Watch</a>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value">₹{{ revenue|floatformat:0 }}</div><div class="kpi-change up">↑ From delivered orders</div><div class="kpi-icon" style="font-size:1.4rem;">💰</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value">{{ total_orders }}</div><div class="kpi-change up">All time</div><div class="kpi-icon" style="font-size:1.4rem;">📦</div></div>
+        <div class="kpi-card"><div class="kpi-label">Active Listings</div><div class="kpi-value">{{ total_watches }}</div><div class="kpi-change up">Watches listed</div><div class="kpi-icon" style="font-size:1.4rem;">⌚</div></div>
+        <div class="kpi-card"><div class="kpi-label">Low Stock</div><div class="kpi-value">{{ low_stock|length }}</div><div class="kpi-change {% if low_stock %}down{% else %}up{% endif %}">{% if low_stock %}Needs attention{% else %}All stocked{% endif %}</div><div class="kpi-icon" style="font-size:1.4rem;">⚠️</div></div>
+      </div>
+
+      <!-- Revenue SVG Chart -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-hdr">
+            <div style="font-size:1.88rem;"  class="chart-title">Revenue Trend</div>
+            <div class="period-btns">
+              <button style="font-size:.88rem;"  class="period-btn active">7D</button>
+              <button style="font-size:.88rem;"  class="period-btn">1M</button>
+              <button style="font-size:.88rem;"  class="period-btn">3M</button>
+            </div>
+          </div>
+          <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+            <defs><linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4af5f" stop-opacity=".22"/><stop offset="100%" stop-color="#d4af5f" stop-opacity="0"/></linearGradient></defs>
+            <line x1="0" y1="40" x2="560" y2="40" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <line x1="0" y1="80" x2="560" y2="80" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="560" y2="120" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <line x1="0" y1="155" x2="560" y2="155" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+            <path d="M20,130 L100,95 L180,110 L260,55 L340,75 L420,38 L500,52 L500,170 L20,170 Z" fill="url(#aG)"/>
+            <polyline points="20,130 100,95 180,110 260,55 340,75 420,38 500,52" fill="none" stroke="#d4af5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="20" cy="130" r="4" fill="#d4af5f"/><circle cx="100" cy="95" r="4" fill="#d4af5f"/>
+            <circle cx="180" cy="110" r="4" fill="#d4af5f"/><circle cx="260" cy="55" r="4" fill="#d4af5f"/>
+            <circle cx="340" cy="75" r="4" fill="#d4af5f"/><circle cx="420" cy="38" r="4" fill="#d4af5f"/>
+            <circle cx="500" cy="52" r="4" fill="#d4af5f"/>
+            <text x="20" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Mon</text>
+            <text x="100" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Tue</text>
+            <text x="180" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Wed</text>
+            <text x="260" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Thu</text>
+            <text x="340" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Fri</text>
+            <text x="420" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Sat</text>
+            <text x="500" y="176" fill="#6b7280" font-size="10" text-anchor="middle" font-family="Josefin Sans">Sun</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div  class="chart-hdr"><div class="chart-title">Sales by Category</div></div>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 120 120" style="width:110px;flex-shrink:0;">
+              <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="16"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#d4af5f" stroke-width="16" stroke-dasharray="145 145" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#818cf8" stroke-width="16" stroke-dasharray="58 232" stroke-dashoffset="-145" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#4ade80" stroke-width="16" stroke-dasharray="36 254" stroke-dashoffset="-203" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#d4af5f"></div>Classic — 50%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#818cf8"></div>Limited — 20%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Sport — 30%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="table-card">
+        <div class="table-hdr"><div class="table-title">Recent Orders</div><span onclick="showPage('orders',null)" style="font-size:.65rem;color:var(--gold);cursor:pointer;letter-spacing:2px;">VIEW ALL →</span></div>
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td style="color:var(--white);">#{{ order.id }}</td>
+              <td>{{ order.user.username }}</td>
+              <td style="font-family:var(--font-d);color:var(--gold);">₹{{ order.total_price|floatformat:0 }}</td>
+              <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+              <td>{{ order.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">No orders yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Low Stock Alert -->
+      {% if low_stock %}
+      <div class="table-card" style="border-color:rgba(251,146,60,.3);">
+        <div class="table-hdr"><div class="table-title" style="color:#fb923c;">⚠ Low Stock Alerts</div></div>
+        <table class="data-table">
+          <thead><tr><th>Watch</th><th>Stock</th><th>Action</th></tr></thead>
+          <tbody>
+            {% for w in low_stock %}
+            <tr>
+              <td style="color:var(--white);">{{ w.name }}</td>
+              <td><span class="badge badge-{% if w.stock == 0 %}sold{% else %}low{% endif %}">{{ w.stock }} left</span></td>
+              <td><a href="{% url 'edit_watch' w.pk %}" class="btn-outline btn-sm">Restock</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── ORDERS PAGE ── -->
+    <div class="dash-page" id="page-orders">
+      <div class="dash-topbar">
+        <div class="dash-title">My <span>Orders</span></div>
+      </div>
+      <div class="table-card">
+        <div class="table-hdr">
+          <div class="table-title">{{ total_orders }} Orders Total</div>
+          <input class="table-search" type="text" placeholder="Search orders…" oninput="filterTable(this,'ordersBody')">
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="ordersBody">
+            {% for order in orders %}
+            <tr>
+              <td style="color:var(--white);">#{{ order.id }}</td>
+              <td>{{ order.user.username }}</td>
+              <td style="font-family:var(--font-d);color:var(--gold);">₹{{ order.total_price|floatformat:0 }}</td>
+              <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+              <td>{{ order.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">No orders yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MY WATCHES ── -->
+    <div class="dash-page" id="page-watches">
+      <div class="dash-topbar">
+        <div class="dash-title">My <span>Watches</span></div>
+        <a href="{% url 'add_watch' %}" class="btn-gold btn-sm">+ Add New</a>
+      </div>
+      <div class="table-card">
+        <div class="table-hdr">
+          <div class="table-title">{{ total_watches }} Listings</div>
+          <input class="table-search" type="text" placeholder="Search…" oninput="filterTable(this,'watchesBody')">
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Watch</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="watchesBody">
+            {% for w in watches %}
+            <tr>
+              <td style="color:var(--white);font-weight:400;">{{ w.name }}</td>
+              <td>{{ w.get_category_display }}</td>
+              <td style="font-family:var(--font-d);color:var(--gold);">₹{{ w.price|floatformat:0 }}</td>
+              <td><span class="badge badge-{% if w.stock == 0 %}sold{% elif w.stock <= 3 %}low{% else %}live{% endif %}">{{ w.stock }}</span></td>
+              <td><span class="badge badge-{% if w.is_active %}live{% else %}sold{% endif %}">{% if w.is_active %}Live{% else %}Inactive{% endif %}</span></td>
+              <td style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="{% url 'edit_watch' w.pk %}" class="btn-outline btn-sm">Edit</a>
+                <a href="{% url 'watch_detail' w.pk %}" class="btn-outline btn-sm">View</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted);">No watches listed yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="dash-page" id="page-analytics">
+      <div class="dash-topbar"><div class="dash-title">Sales <span>Analytics</span></div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value">₹{{ revenue|floatformat:0 }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value">{{ total_orders }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">{% if total_orders %}₹{% widthratio revenue total_orders 1 %}{% else %}—{% endif %}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Active Products</div><div class="kpi-value">{{ total_watches }}</div></div>
+      </div>
+      <div class="chart-card" style="margin-top:16px;">
+        <div class="chart-hdr"><div class="chart-title">Monthly Performance (Simulated)</div></div>
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+          <defs><linearGradient id="bG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4af5f" stop-opacity=".18"/><stop offset="100%" stop-color="#d4af5f" stop-opacity="0"/></linearGradient></defs>
+          {% for i in "123456789012" %}<line x1="{{ forloop.counter0|add:1|add:forloop.counter0|add:forloop.counter0|add:forloop.counter0|add:forloop.counter0 }}" y1="0" x2="{{ forloop.counter0|add:1 }}" y2="170" stroke="rgba(255,255,255,.03)" stroke-width="1"/>{% endfor %}
+          <path d="M30,145 L90,110 L150,128 L210,70 L270,90 L330,50 L390,68 L450,40 L510,58 L570,30 L630,45 L690,28 L690,175 L30,175 Z" fill="url(#bG)"/>
+          <polyline points="30,145 90,110 150,128 210,70 270,90 330,50 390,68 450,40 510,58 570,30 630,45 690,28" fill="none" stroke="#d4af5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          {% for m in "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec" %}{% endfor %}
+          <text x="30" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Jan</text>
+          <text x="90" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Feb</text>
+          <text x="150" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Mar</text>
+          <text x="210" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Apr</text>
+          <text x="270" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">May</text>
+          <text x="330" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Jun</text>
+          <text x="390" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Jul</text>
+          <text x="450" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Aug</text>
+          <text x="510" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Sep</text>
+          <text x="570" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Oct</text>
+          <text x="630" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Nov</text>
+          <text x="690" y="192" fill="#6b7280" font-size="9" text-anchor="middle" font-family="Josefin Sans">Dec</text>
+        </svg>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+
+  function showPage(page, el) {
+    document.querySelectorAll('.dash-page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (el) {
+      document.querySelectorAll('.dash-link').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+    }
+  }
+
+  function filterTable(input, tbodyId) {
+    const q = input.value.toLowerCase();
+    document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.closest('.period-btns')?.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+{% endblock %}

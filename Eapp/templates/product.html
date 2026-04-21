@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Collection — LUXWATCH{% endblock %}
+{% block content %}
+<div style="padding:100px 5% 40px;background:var(--bg);">
+  <span style="font-size:.86rem;" class="section-label">2025 Catalogue</span>
+  <h1 class="section-heading">The <em>Collection</em></h1>
+  <p style="font-size:.96rem;color:var(--muted2);margin-top:12px;max-width:480px;">{{ total }} timepieces available. Filter, search and find your perfect match.</p>
+</div>
+
+<!-- FILTER BAR -->
+<div style="font-size:.86rem;" class="filter-bar">
+  <button class="filter-btn {% if not category %}active{% endif %}" onclick="setFilter(this,'')">All</button>
+  <button class="filter-btn {% if category == 'classic' %}active{% endif %}" onclick="setFilter(this,'classic')">Classic</button>
+  <button class="filter-btn {% if category == 'sport' %}active{% endif %}" onclick="setFilter(this,'sport')">Sport</button>
+  <button class="filter-btn {% if category == 'limited' %}active{% endif %}" onclick="setFilter(this,'limited')">Limited Edition</button>
+  <button class="filter-btn {% if category == 'new' %}active{% endif %}" onclick="setFilter(this,'new')">New Arrivals</button>
+  <div class="sort-wrap">
+    <select class="sort-select" onchange="setSort(this.value)">
+      <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Newest First</option>
+      <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low → High</option>
+      <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High → Low</option>
+      <option value="name" {% if sort == 'name' %}selected{% endif %}>Name A–Z</option>
+    </select>
+  </div>
+</div>
+
+<div class="sidebar-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h5>Search</h5>
+      <input type="text" class="table-search" style="width:100%" placeholder="Watch name, brand…" id="searchInput" value="{{ search }}" oninput="debounceSearch(this.value)">
+    </div>
+    <div class="sidebar-section">
+      <h5>Category</h5>
+      <label><input type="checkbox" {% if not category or category == 'classic' %}checked{% endif %} onchange="toggleCat('classic',this)"> Classic</label>
+      <label><input type="checkbox" {% if not category or category == 'sport' %}checked{% endif %} onchange="toggleCat('sport',this)"> Sport</label>
+      <label><input type="checkbox" {% if not category or category == 'limited' %}checked{% endif %} onchange="toggleCat('limited',this)"> Limited Edition</label>
+      <label><input type="checkbox" {% if not category or category == 'new' %}checked{% endif %} onchange="toggleCat('new',this)"> New Arrivals</label>
+    </div>
+    <div class="sidebar-section">
+      <h5>Max Price</h5>
+      <input type="range" class="price-slider" min="5000" max="500000" value="500000" oninput="updatePrice(this.value)">
+      <div class="price-labels"><span>₹5K</span><span id="priceLabel">₹5,00,000</span></div>
+    </div>
+    <div class="sidebar-section">
+      <h5>Stock</h5>
+      <label><input type="checkbox" checked> In Stock Only</label>
+    </div>
+  </aside>
+
+  <!-- PRODUCTS AREA -->
+  <div class="products-area">
+    <div class="products-meta">
+      <span class="products-count">{{ total }} piece{% if total != 1 %}s{% endif %}</span>
+    </div>
+    <div class="watch-grid">
+      {% if watches %}
+        {% for w in watches %}
+        <div class="watch-card" data-price="{{ w.price }}" data-cat="{{ w.category }}">
+          <div class="watch-card-img">
+            {% if w.category == 'limited' %}<div class="watch-tag">Limited</div>{% elif w.category == 'new' %}<div class="watch-tag">New</div>{% elif w.is_featured %}<div class="watch-tag">Featured</div>{% endif %}
+            <button class="watch-wishlist" title="Wishlist">♡</button>
+            {% if w.image %}<img src="{{ w.image.url }}" alt="{{ w.name }}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80'">
+            {% else %}<img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80" alt="{{ w.name }}">{% endif %}
+            <div class="watch-overlay"><a href="{% url 'watch_detail' w.pk %}">View Details →</a></div>
+          </div>
+          <div class="watch-body">
+            <div style="font-size:.86rem;" class="watch-brand">{{ w.brand }}</div>
+            <h3>{{ w.name }}</h3>
+            <div style="font-size:.86rem;" class="watch-meta">{{ w.get_category_display }}{% if w.material %} · {{ w.material }}{% endif %}</div>
+            <div class="watch-footer">
+              <span class="watch-price">₹{{ w.price|floatformat:0 }}</span>
+              {% if w.stock > 0 %}
+              <a href="{% url 'add_to_cart' w.pk %}" class="btn-gold btn-sm">Add to Cart</a>
+              {% else %}
+              <span class="badge badge-sold">Sold Out</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="grid-column:1/-1;text-align:center;padding:80px 20px;">
+          <div style="font-size:2.5rem;margin-bottom:20px;opacity:.2;">⌚</div>
+          <h3 style="font-family:var(--font-d);font-size:1.6rem;color:var(--muted);margin-bottom:12px;">No watches found</h3>
+          <a href="{% url 'productpage' %}" class="btn-outline">Clear Filters</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  function setFilter(btn, cat) {
+    const url = new URL(window.location);
+    if(cat) url.searchParams.set('category', cat); else url.searchParams.delete('category');
+    window.location = url;
+  }
+  function setSort(val) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', val);
+    window.location = url;
+  }
+  let searchTimer;
+  function debounceSearch(val) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const url = new URL(window.location);
+      if(val) url.searchParams.set('q', val); else url.searchParams.delete('q');
+      window.location = url;
+    }, 500);
+  }
+  function updatePrice(val) {
+    document.getElementById('priceLabel').textContent = '₹' + Number(val).toLocaleString('en-IN');
+    document.querySelectorAll('.watch-card').forEach(card => {
+      card.style.display = parseFloat(card.dataset.price) <= parseFloat(val) ? '' : 'none';
+    });
+  }
+  function toggleCat(cat, cb) {
+    document.querySelectorAll('.watch-card').forEach(card => {
+      const catEl = card.dataset.cat;
+      const checks = document.querySelectorAll('.sidebar-section input[type=checkbox]');
+      let show = false;
+      checks.forEach(c => { if(c.checked && c.getAttribute('onchange')?.includes(catEl)) show = true; });
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'admin_base.html' %}
+{% block title %}Admin Dashboard — LUXWATCH{% endblock %}
+{% block nav_overview %}active{% endblock %}
+{% block content %}
+<div class="admin-topbar">
+  <div>
+    <div class="admin-section-title">Admin <span>Dashboard</span></div>
+    <div style="font-size:.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px;" id="aDate"></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <a href="{% url 'add_watch' %}" class="btn-gold btn-sm">+ Add Watch</a>
+    <a href="{% url 'admin_users' %}" class="btn-outline btn-sm">Manage Users</a>
+  </div>
+</div>
+
+<!-- KPI GRID -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">Total Revenue</div>
+    <div class="kpi-value">₹{{ total_revenue|floatformat:0 }}</div>
+    <div class="kpi-change up">↑ From delivered orders</div>
+    <div class="kpi-icon" style="font-size:1.6rem;">💰</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Users</div>
+    <div class="kpi-value">{{ total_users }}</div>
+    <div class="kpi-change up">Registered accounts</div>
+    <div class="kpi-icon" style="font-size:1.6rem;">👥</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Orders</div>
+    <div class="kpi-value">{{ total_orders }}</div>
+    <div class="kpi-change">{{ month_orders }} this month</div>
+    <div class="kpi-icon" style="font-size:1.6rem;">📦</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Watches Listed</div>
+    <div class="kpi-value">{{ total_watches }}</div>
+    <div class="kpi-change">Across all sellers</div>
+    <div class="kpi-icon" style="font-size:1.6rem;">⌚</div>
+  </div>
+</div>
+
+<!-- SECONDARY KPIs -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+  <div class="kpi-card" style="padding:18px 22px;">
+    <div class="kpi-label">Pending Orders</div>
+    <div class="kpi-value" style="font-size:1.5rem;color:var(--gold);">{{ pending_orders }}</div>
+  </div>
+  <div class="kpi-card" style="padding:18px 22px;">
+    <div class="kpi-label">Unread Messages</div>
+    <div class="kpi-value" style="font-size:1.5rem;color:{% if messages_unread %}var(--danger){% else %}var(--success){% endif %};">{{ messages_unread }}</div>
+  </div>
+  <div class="kpi-card" style="padding:18px 22px;">
+    <div class="kpi-label">Active Sellers</div>
+    <div class="kpi-value" style="font-size:1.5rem;">{{ sellers|length }}</div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="chart-hdr">
+      <div class="chart-title">Platform Revenue Trend</div>
+      <div class="period-btns">
+        <button class="period-btn active">7D</button>
+        <button class="period-btn">1M</button>
+        <button class="period-btn">1Y</button>
+      </div>
+    </div>
+    <svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+      <defs>
+        <linearGradient id="rG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d4af5f" stop-opacity=".2"/>
+          <stop offset="100%" stop-color="#d4af5f" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="0" y1="36" x2="560" y2="36" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="0" y1="72" x2="560" y2="72" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="0" y1="108" x2="560" y2="108" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <line x1="0" y1="144" x2="560" y2="144" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+      <path d="M20,140 L100,105 L180,118 L260,60 L340,80 L420,36 L500,50 L500,165 L20,165 Z" fill="url(#rG)"/>
+      <polyline points="20,140 100,105 180,118 260,60 340,80 420,36 500,50" fill="none" stroke="#d4af5f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="260" cy="60" r="5" fill="#d4af5f" stroke="#08090d" stroke-width="2"/>
+      <circle cx="420" cy="36" r="5" fill="#d4af5f" stroke="#08090d" stroke-width="2"/>
+      <text x="20" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Mon</text>
+      <text x="100" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Tue</text>
+      <text x="180" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Wed</text>
+      <text x="260" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Thu</text>
+      <text x="340" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Fri</text>
+      <text x="420" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Sat</text>
+      <text x="500" y="178" fill="#6b7280" font-size="10" text-anchor="middle">Sun</text>
+    </svg>
+  </div>
+  <div class="chart-card">
+    <div class="chart-hdr"><div class="chart-title">Users by Role</div></div>
+    <div class="donut-wrap">
+      <svg viewBox="0 0 120 120" style="width:110px;flex-shrink:0;">
+        <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="16"/>
+        <circle cx="60" cy="60" r="46" fill="none" stroke="#4ade80" stroke-width="16" stroke-dasharray="159 130" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+        <circle cx="60" cy="60" r="46" fill="none" stroke="#d4af5f" stroke-width="16" stroke-dasharray="58 231" stroke-dashoffset="-159" transform="rotate(-90 60 60)"/>
+        <circle cx="60" cy="60" r="46" fill="none" stroke="#818cf8" stroke-width="16" stroke-dasharray="29 260" stroke-dashoffset="-217" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Buyers — 55%</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d4af5f"></div>Sellers — 20%</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#818cf8"></div>Admins — 10%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABLES ROW -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+  <!-- Recent Orders -->
+  <div class="table-card">
+    <div class="table-hdr">
+      <div class="table-title">Recent Orders</div>
+      <a href="{% url 'admin_orders' %}" style="font-size:.52rem;color:var(--gold);letter-spacing:2px;">VIEW ALL →</a>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>#ID</th><th>User</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr>
+          <td style="color:var(--white);">#{{ order.id }}</td>
+          <td>{{ order.user.username }}</td>
+          <td style="color:var(--gold);font-family:var(--font-d);">₹{{ order.total_price|floatformat:0 }}</td>
+          <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No orders</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Users -->
+  <div class="table-card">
+    <div class="table-hdr">
+      <div class="table-title">New Users</div>
+      <a href="{% url 'admin_users' %}" style="font-size:.52rem;color:var(--gold);letter-spacing:2px;">VIEW ALL →</a>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Username</th><th>Role</th><th>Joined</th></tr></thead>
+      <tbody>
+        {% for u in recent_users %}
+        <tr>
+          <td style="color:var(--white);">{{ u.username }}</td>
+          <td><span class="badge badge-{% if u.role == 'admin' %}shipped{% elif u.role == 'seller' %}pending{% else %}live{% endif %}">{{ u.role }}</span></td>
+          <td>{{ u.date_joined|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No users</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Low Stock -->
+{% if low_stock_watches %}
+<div class="table-card" style="margin-top:16px;border-color:rgba(251,146,60,.3);">
+  <div class="table-hdr"><div class="table-title" style="color:#fb923c;">⚠ Platform-wide Low Stock</div></div>
+  <table class="data-table">
+    <thead><tr><th>Watch</th><th>Seller</th><th>Stock</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for w in low_stock_watches %}
+      <tr>
+        <td style="color:var(--white);">{{ w.name }}</td>
+        <td>{{ w.seller.username }}</td>
+        <td><span class="badge badge-{% if w.stock == 0 %}sold{% else %}low{% endif %}">{{ w.stock }}</span></td>
+        <td><a href="{% url 'edit_watch' w.pk %}" class="btn-outline btn-sm">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+document.getElementById('aDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+document.querySelectorAll('.period-btn').forEach(b => b.addEventListener('click', function(){
+  this.closest('.period-btns')?.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));
+  this.classList.add('active');
+}));
+</script>
+{% endblock %}

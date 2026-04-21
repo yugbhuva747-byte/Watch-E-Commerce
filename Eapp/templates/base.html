@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LUXWATCH — Premium Timepieces{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% include 'navbar.html' %}
+
+<div class="page-wrapper">
+  {% if messages %}
+  <div class="toast-container" id="toastContainer">
+    {% for msg in messages %}
+    <div class="toast toast-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+{% include 'footer.html' %}
+
+<script>
+  // Navbar scroll effect
+  window.addEventListener('scroll', function() {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Active nav highlight
+  document.querySelectorAll('.nav-links a').forEach(function(a) {
+    if (a.getAttribute('href') === window.location.pathname) {
+      a.classList.add('active');
+    }
+  });
+
+  // Mobile menu toggle
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+    document.getElementById('mobileOverlay').classList.toggle('open');
+  }
+
+  // Auto-hide toasts
+  setTimeout(function() {
+    document.querySelectorAll('.toast').forEach(function(t) {
+      t.classList.add('hide');
+    });
+  }, 4000);
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

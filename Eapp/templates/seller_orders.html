@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}My Orders — LUXWATCH{% endblock %}
+{% block content %}
+<div style="padding:100px 5% 40px;background:var(--bg);">
+  <span class="section-label">Seller Hub</span>
+  <h1 class="section-heading" style="margin-top:8px;">My <em>Orders</em></h1>
+</div>
+<div style="padding:0 5% 80px;">
+  <div class="table-card">
+    <div class="table-hdr">
+      <div class="table-title">{{ orders|length }} Orders</div>
+      <input class="table-search" type="text" placeholder="Search…" oninput="liveSearch(this,'sOBody')">
+    </div>
+    <table class="data-table">
+      <thead><tr><th>#ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody id="sOBody">
+        {% for order in orders %}
+        <tr>
+          <td style="color:var(--white);">#{{ order.id }}</td>
+          <td>{{ order.user.username }}</td>
+          <td style="font-family:var(--font-d);color:var(--gold);">₹{{ order.total_price|floatformat:0 }}</td>
+          <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+          <td>{{ order.created_at|date:"d M Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);">No orders yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+function liveSearch(input, tbodyId) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none');
+}
+</script>
+{% endblock %}

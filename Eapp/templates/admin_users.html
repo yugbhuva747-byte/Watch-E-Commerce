@@ -1,0 +1,119 @@
+{% extends 'admin_base.html' %}
+{% block title %}User Management — LUXWATCH Admin{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block content %}
+<div class="admin-topbar">
+  <div>
+    <div class="admin-section-title">User <span>Management</span></div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:4px;letter-spacing:1px;">Manage all registered accounts</div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <!-- Role filter -->
+    <div style="display:flex;gap:4px;">
+      <a href="{% url 'admin_users' %}" class="period-btn {% if not role_filter %}active{% endif %}">All</a>
+      <a href="{% url 'admin_users' %}?role=buyer" class="period-btn {% if role_filter == 'buyer' %}active{% endif %}">Buyers</a>
+      <a href="{% url 'admin_users' %}?role=seller" class="period-btn {% if role_filter == 'seller' %}active{% endif %}">Sellers</a>
+      <a href="{% url 'admin_users' %}?role=admin" class="period-btn {% if role_filter == 'admin' %}active{% endif %}">Admins</a>
+    </div>
+    <form method="get" style="display:flex;gap:8px;">
+      <input type="hidden" name="role" value="{{ role_filter }}">
+      <input type="text" name="q" value="{{ search }}" class="table-search" placeholder="Search users…" style="width:180px;">
+      <button type="submit" class="btn-gold btn-sm">Search</button>
+    </form>
+  </div>
+</div>
+
+<!-- KPI Bar -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+  <div class="kpi-card" style="padding:16px 20px;">
+    <div class="kpi-label">Total Users</div>
+    <div class="kpi-value" style="font-size:1.6rem;">{{ users|length }}</div>
+  </div>
+  <div class="kpi-card" style="padding:16px 20px;">
+    <div class="kpi-label">Buyers</div>
+    <div class="kpi-value" style="font-size:1.6rem;">{{ users|length }}</div>
+  </div>
+  <div class="kpi-card" style="padding:16px 20px;">
+    <div class="kpi-label">Sellers</div>
+    <div class="kpi-value" style="font-size:1.6rem;color:var(--gold);">—</div>
+  </div>
+  <div class="kpi-card" style="padding:16px 20px;">
+    <div class="kpi-label">Admins</div>
+    <div class="kpi-value" style="font-size:1.6rem;color:#818cf8;">—</div>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-hdr">
+    <div class="table-title">{{ users|length }} Account{% if users|length != 1 %}s{% endif %}{% if role_filter %} · {{ role_filter|capfirst }}s{% endif %}{% if search %} · "{{ search }}"{% endif %}</div>
+    <a href="{% url 'admin_users' %}" class="btn-outline btn-sm">Clear Filters</a>
+  </div>
+  <table class="data-table" id="usersTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td style="color:var(--muted);">{{ u.id }}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--border-g);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--gold);flex-shrink:0;">{{ u.username|first|upper }}</div>
+            <span style="color:var(--white);">{{ u.username }}</span>
+          </div>
+        </td>
+        <td>{{ u.email|default:"—" }}</td>
+        <td>
+          <span class="badge badge-{% if u.role == 'admin' %}shipped{% elif u.role == 'seller' %}pending{% else %}live{% endif %}">
+            {{ u.role|capfirst }}
+          </span>
+        </td>
+        <td>
+          <span class="badge badge-{% if u.is_active %}live{% else %}sold{% endif %}">
+            {% if u.is_active %}Active{% else %}Suspended{% endif %}
+          </span>
+        </td>
+        <td>{{ u.date_joined|date:"d M Y" }}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a href="{% url 'admin_toggle_user' u.pk %}" class="btn-outline btn-sm" onclick="return confirm('Toggle account status for {{ u.username }}?')" style="{% if not u.is_active %}color:var(--success);border-color:var(--success);{% endif %}">
+              {% if u.is_active %}Suspend{% else %}Activate{% endif %}
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;padding:50px;color:var(--muted);">
+          <div style="font-size:1.8rem;margin-bottom:12px;opacity:.2;">👥</div>
+          No users found
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% block extra_js %}
+<script>
+// Live search
+const searchField = document.querySelector('input[name="q"]');
+if(searchField) {
+  searchField.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

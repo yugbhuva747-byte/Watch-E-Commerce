@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Register — LUXWATCH{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-wrap">
+    <span class="auth-logo">LUXWATCH</span>
+    <h2 class="auth-heading">Create Account</h2>
+    <p class="auth-sub">Join the LUXWATCH collector community</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group"><label>Username</label><input type="text" name="username" required placeholder="your_username"></div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="••••••••"></div>
+      <div class="form-group"><label>Account Type</label>
+        <select name="role">
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-gold" style="width:100%;margin-top:8px;">Create Account</button>
+    </form>
+    <div class="auth-footer">Already have an account? <a href="{% url 'login' %}">Sign In</a></div>
+  </div>
+</div>
+{% endblock %}

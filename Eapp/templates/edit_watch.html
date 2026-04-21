@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ watch.name }} — LUXWATCH{% endblock %}
+{% block content %}
+<div style="padding:100px 5% 40px;background:var(--bg);">
+  <span class="section-label">Edit Listing</span>
+  <h1 class="section-heading" style="margin-top:8px;">Update <em>{{ watch.name }}</em></h1>
+</div>
+<div style="padding:0 5% 80px;">
+  <div class="add-watch-layout">
+    <form class="form-panel" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group"><label>Watch Name *</label><input type="text" name="name" required value="{{ watch.name }}"></div>
+        <div class="form-group"><label>Brand *</label><input type="text" name="brand" required value="{{ watch.brand }}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Price (₹) *</label><input type="number" name="price" required value="{{ watch.price }}"></div>
+        <div class="form-group"><label>Stock *</label><input type="number" name="stock" required value="{{ watch.stock }}"></div>
+      </div>
+      <div class="form-group"><label>Category</label>
+        <select name="category">
+          <option value="classic" {% if watch.category == 'classic' %}selected{% endif %}>Classic</option>
+          <option value="sport" {% if watch.category == 'sport' %}selected{% endif %}>Sport</option>
+          <option value="limited" {% if watch.category == 'limited' %}selected{% endif %}>Limited Edition</option>
+          <option value="new" {% if watch.category == 'new' %}selected{% endif %}>New Arrival</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Material</label><input type="text" name="material" value="{{ watch.material }}"></div>
+        <div class="form-group"><label>Movement</label><input type="text" name="movement" value="{{ watch.movement }}"></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea name="description" style="min-height:120px;">{{ watch.description }}</textarea></div>
+      <div class="form-group"><label>Replace Image (leave blank to keep current)</label><input type="file" name="image" accept="image/*" style="color:var(--muted2);"></div>
+      <div class="form-group" style="display:flex;align-items:center;gap:12px;">
+        <input type="checkbox" name="is_featured" id="featured" {% if watch.is_featured %}checked{% endif %} style="accent-color:var(--gold);width:16px;height:16px;">
+        <label for="featured" style="font-size:.65rem;color:var(--muted2);margin:0;cursor:pointer;">Featured on homepage</label>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+        <button type="submit" class="btn-gold">Save Changes</button>
+        <a href="{% url 'seller_dashboard' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+    <div class="form-panel">
+      <div style="font-size:.55rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Current Image</div>
+      {% if watch.image %}
+      <img src="{{ watch.image.url }}" alt="{{ watch.name }}" style="width:100%;aspect-ratio:4/3;object-fit:cover;">
+      {% else %}
+      <div style="width:100%;aspect-ratio:4/3;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted);">No image uploaded</div>
+      {% endif %}
+      <div style="margin-top:20px;padding:16px;background:var(--bg3);border:1px solid var(--border);">
+        <div style="font-size:.52rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Watch Stats</div>
+        <div style="font-size:.65rem;color:var(--muted2);line-height:2;">
+          Views: {{ watch.views_count }}<br>
+          Listed: {{ watch.created_at|date:"N j, Y" }}<br>
+          Status: {% if watch.is_active %}<span style="color:var(--success);">Active</span>{% else %}<span style="color:var(--danger);">Inactive</span>{% endif %}
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <a href="{% url 'delete_watch' watch.pk %}" class="btn-danger btn-sm btn-gold" onclick="return confirm('Delete this watch? This cannot be undone.')">Delete Listing</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

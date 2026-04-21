@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}LUXWATCH — Premium Timepieces{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div style="font-size: 0.900rem; margin-left: 40 px; " class="hero-eyebrow fade-up ">New Collection 2025</div>
+    <h1 style="margin-left: -70px;" class="fade-up delay-1">Time<em>Elevated</em></h1>
+      <h1 style="margin-left: 60px;"> to Art</h1>
+    <p style="font-size: 0.900rem; margin-left: -40px;" class="hero-desc fade-up delay-2 ">Where horological mastery meets uncompromising design. Each piece is a meditation on perfection.</p>
+    <div class="hero-actions fade-up delay-3">
+      <a href="{% url 'productpage' %}"  class="btn-gold">Explore Collection</a>
+      <a href="{% url 'aboutpage' %}" class="btn-outline">Our Heritage</a>
+    </div>
+    <div class="hero-stats fade-up delay-4">
+      <div><div class="stat-num">{{ total_watches }}+</div><div class="stat-label">Unique Pieces</div></div>
+      <div><div class="stat-num">12</div><div class="stat-label">Years Crafting</div></div>
+      <div><div class="stat-num">3K+</div><div class="stat-label">Collectors</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+{% comment %} <div class="countdown-bar">
+  <span class="cd-label">Limited Offer Ends In</span>
+  <div class="cd-timer">
+    <div class="cd-unit"><div class="cd-num" id="cdH">00</div><div class="cd-sub">Hours</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit"><div class="cd-num" id="cdM">00</div><div class="cd-sub">Mins</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit"><div class="cd-num" id="cdS">00</div><div class="cd-sub">Secs</div></div>
+  </div>
+  <div style="margin-left:auto;font-size:.6rem;color:var(--muted);letter-spacing:2px;">UP TO 30% OFF SELECTED MODELS</div>
+</div> {% endcomment %}
+
+<!-- MARQUEE -->
+<div class="marquee-section" aria-hidden="true">
+  <div class="marquee-track">
+    {% for i in "12345678" %}
+    <div class="marquee-item">Swiss Movement<div class="marquee-dot"></div></div>
+    <div class="marquee-item">Sapphire Crystal<div class="marquee-dot"></div></div>
+    <div class="marquee-item">Water Resistant 200m<div class="marquee-dot"></div></div>
+    <div class="marquee-item">Lifetime Warranty<div class="marquee-dot"></div></div>
+    <div class="marquee-item">Handcrafted in India<div class="marquee-dot"></div></div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- FEATURED COLLECTION -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <span class="section-label">Curated Selection</span>
+      <h2 class="section-heading">Featured <em>Collection</em></h2>
+    </div>
+    <a href="{% url 'productpage' %}" class="btn-outline">View All</a>
+  </div>
+  {% comment %} <a href="{% url 'watch_detail' w.pk %}"> {% endcomment %}
+  <div class="watch-grid" id="watchGrid">
+    {% if featured %}
+      {% for w in featured %}
+      <div class="watch-card">
+        <div class="watch-card-img">
+          {% if w.category == 'limited' %}<div class="watch-tag">Limited</div>{% elif w.category == 'new' %}<div class="watch-tag">New</div>{% elif w.is_featured %}<div class="watch-tag">Featured</div>{% endif %}
+          <button class="watch-wishlist" title="Wishlist">♡</button>
+          {% if w.image %}<img src="{{ w.image.url }}" alt="{{ w.name }}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80'">
+          {% else %}<img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80" alt="{{ w.name }}">{% endif %}
+          <div class="watch-overlay"><a href="{% url 'watch_detail' w.pk %}">View Details →</a></div>
+        </div>
+        <div class="watch-body">
+          <div style="font-size: 0.775rem;" class="watch-brand">{{ w.brand }}</div>
+          <h3>{{ w.name }}</h3>
+          <div style="font-size: 0.775rem;" class="watch-meta">{{ w.get_category_display }} · {{ w.material|default:"Stainless Steel" }}</div>
+          <div class="watch-footer">
+            <span class="watch-price">₹{{ w.price|floatformat:0 }}</span>
+            
+            <a href="{% url 'add_to_cart' w.pk %}" class="watch-add" title="Add to cart">+</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <!-- Fallback: load via API -->
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:.75rem;letter-spacing:2px;">Loading collection...</div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- PHILOSOPHY STRIP -->
+<section class="section bg2" style="padding:80px 5%;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1200px;margin:0 auto;" class="philosophy-grid">
+    <div>
+      <span class="section-label">Our Philosophy</span>
+      <h2 class="section-heading">Crafted for <em>Eternity</em></h2>
+      <div class="divider"></div>
+      <p style="font-size:1.00rem;color:var(--muted2);line-height:2.2;margin-bottom:16px;">Every LUXWATCH timepiece begins not with machinery, but with intention. Our master watchmakers spend months perfecting each symphony of components.</p>
+      <p style="font-size:1.00rem;color:var(--muted2);line-height:2.2;margin-bottom:30px;">We reject the disposable. We embrace the enduring. Each watch is signed, numbered, and accompanied by a certificate of authenticity.</p>
+      <a href="{% url 'aboutpage' %}" class="btn-gold">Our Heritage</a>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      {% for feat in "ABCD" %}
+      {% if forloop.counter == 1 %}<div class="val-card"><div class="val-icon">⌚</div><h4>Precision</h4><p style="font-size: 0.800rem;">Measured to the micron. Assembled by hand.</p></div>
+      {% elif forloop.counter == 2 %}<div class="val-card"><div class="val-icon">🏛️</div><h4>Heritage</h4><p style="font-size: 0.800rem;">Centuries of horological tradition.</p></div>
+      {% elif forloop.counter == 3 %}<div class="val-card"><div class="val-icon">♾️</div><h4>Permanence</h4><p style="font-size: 0.800rem;">Designed to outlive its owner.</p></div>
+      {% else %}<div class="val-card"><div class="val-icon">🌿</div><h4>Responsibility</h4><p style="font-size: 0.800rem;">Ethical sourcing. Zero compromise.</p></div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="text-align:center;">
+  <span style="font-size: 1.0075rem;" class="section-label">Collector Voices</span>
+  <h2 class="section-heading">Words of <em>Distinction</em></h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card"><div class="t-quote">"</div><p class="t-text">Ten years on — not a single service issue. The Obsidian Zenith is my most treasured possession.</p><div class="t-author"><div class="t-avatar">R</div><div><div style="font-size: 0.775rem;" class="t-name">Rajan Mehta</div><div style="font-size: 0.675rem;" class="t-role">Collector · Mumbai</div></div></div></div>
+    <div class="testimonial-card"><div class="t-quote">"</div><p class="t-text">None feel as considered, as deliberate. LUXWATCH is in a category entirely its own.</p><div class="t-author"><div class="t-avatar">A</div><div><div style="font-size: 0.775rem;" class="t-name">Ananya Sharma</div><div style="font-size: 0.675rem;" class="t-role">Entrepreneur · Delhi</div></div></div></div>
+    <div class="testimonial-card"><div class="t-quote">"</div><p class="t-text">The unboxing experience alone justified the price. The watch? Pure poetry on the wrist.</p><div class="t-author"><div class="t-avatar">K</div><div><div style="font-size: 0.775rem;" class="t-name">Karthik Nair</div><div style="font-size: 0.675rem;" class="t-role">Architect · Bangalore</div></div></div></div>
+  </div>
+</section>
+
+<script>
+  let tLeft = 7*3600+42*60+18;
+  function tick() {
+    document.getElementById('cdH').textContent = String(Math.floor(tLeft/3600)).padStart(2,'0');
+    document.getElementById('cdM').textContent = String(Math.floor((tLeft%3600)/60)).padStart(2,'0');
+    document.getElementById('cdS').textContent = String(tLeft%60).padStart(2,'0');
+    if(tLeft>0) tLeft--;
+  }
+  setInterval(tick,1000); tick();
+</script>
+{% endblock %}

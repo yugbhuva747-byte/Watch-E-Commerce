@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Order Placed — LUXWATCH{% endblock %}
+{% block content %}
+<div style="min-height:70vh;display:flex;align-items:center;justify-content:center;padding:60px 5%;">
+  <div style="text-align:center;max-width:500px;">
+    <div style="width:80px;height:80px;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:2rem;color:var(--gold);animation:fadeUp .5s ease;">✓</div>
+    <h1 style="font-family:var(--font-d);font-size:2.8rem;font-weight:300;color:var(--white);margin-bottom:12px;">Order <em style="color:var(--gold);font-style:italic;">Confirmed</em></h1>
+    <p style="font-size:1.rem;color:var(--muted2);line-height:2;margin-bottom:12px;">Thank you for your purchase. Your timepiece is being carefully packaged and will be dispatched within 24 hours.</p>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:40px;letter-spacing:.5px;">You will receive a confirmation email shortly.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'productpage' %}" class="btn-gold">Continue Shopping</a>
+      <a href="{% url 'homepage' %}" class="btn-outline">Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

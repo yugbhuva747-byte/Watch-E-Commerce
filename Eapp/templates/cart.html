@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Cart — LUXWATCH{% endblock %}
+{% block content %}
+<div style="padding:100px 5% 40px;background:var(--bg);">
+  <span style="font-size: 0.800rem;" class="section-label">Your Selection</span>
+  <h1 class="section-heading" style="margin-top:8px;">Shopping <em>Cart</em></h1>
+</div>
+
+{% if items %}
+<div class="cart-layout">
+  <div>
+    <div class="cart-table-wrap">
+      {% for item in items %}
+      <div class="cart-row">
+        {% if item.watch.image %}
+        <img class="cart-img" src="{{ item.watch.image.url }}" alt="{{ item.watch.name }}" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80'">
+        {% else %}
+        <img class="cart-img" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80" alt="{{ item.watch.name }}">
+        {% endif %}
+        <div>
+          <div class="cart-item-name">{{ item.watch.name }}</div>
+          <div style="font-size: 0.800rem;" class="cart-item-brand">{{ item.watch.brand }} · {{ item.watch.get_category_display }}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:4px;letter-spacing:1px;">Qty: {{ item.quantity }}</div>
+        </div>
+        <div class="cart-price">₹{{ item.subtotal|floatformat:0 }}</div>
+        <a href="{% url 'remove_from_cart' item.watch.pk %}" class="cart-remove" title="Remove">✕</a>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:16px;">
+      <a href="{% url 'productpage' %}" class="btn-outline">← Continue Shopping</a>
+    </div>
+  </div>
+
+  <div class="cart-summary">
+    <div style="font-size:1.0rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;">Order Summary</div>
+    {% for item in items %}
+    <div style="font-size: 1.00rem;" class="summary-row">
+      <span>{{ item.watch.name }} ×{{ item.quantity }}</span>
+      <span>₹{{ item.subtotal|floatformat:0 }}</span>
+    </div>
+    {% endfor %}
+    <div class="summary-row"><span>Shipping</span><span style="color:var(--success);">Free</span></div>
+    <div class="summary-row"><span>GST (3%)</span><span>₹{{ total|floatformat:0 }}</span></div>
+    <div class="summary-total" style="margin-top:16px;">
+      <span>Total</span>
+      <span>₹{{ total|floatformat:0 }}</span>
+    </div>
+    <a href="{% url 'checkout' %}" class="btn-gold"  style="width:100%;margin-top:24px;justify-content:center;">Proceed to Checkout</a>
+    <div style="text-align:center;margin-top:16px;font-size:.78rem;color:var(--muted);letter-spacing:1px;">🔒 Secured & Encrypted</div>
+  </div>
+</div>
+{% else %}
+<div class="empty-cart section">
+  <div  class="empty-icon">⌚</div>
+  <h3 style="font-size: 1.00rem;">Your cart is empty</h3>
+  <p style="font-size:.82rem;color:var(--muted);margin-bottom:28px;letter-spacing:.5px;">Explore our collection and find your perfect timepiece.</p>
+  <a href="{% url 'productpage' %}" class="btn-gold">Explore Collection</a>
+</div>
+{% endif %}
+{% endblock %}

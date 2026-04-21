@@ -1,0 +1,110 @@
+{% extends 'admin_base.html' %}
+{% block title %}Order Management — LUXWATCH Admin{% endblock %}
+{% block nav_orders %}active{% endblock %}
+{% block content %}
+<div class="admin-topbar">
+  <div>
+    <div class="admin-section-title">Order <span>Management</span></div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:4px;letter-spacing:1px;">View and update all platform orders</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'admin_orders' %}" class="period-btn {% if not status_filter %}active{% endif %}">All</a>
+    <a href="{% url 'admin_orders' %}?status=pending" class="period-btn {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+    <a href="{% url 'admin_orders' %}?status=confirmed" class="period-btn {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a>
+    <a href="{% url 'admin_orders' %}?status=shipped" class="period-btn {% if status_filter == 'shipped' %}active{% endif %}">Shipped</a>
+    <a href="{% url 'admin_orders' %}?status=delivered" class="period-btn {% if status_filter == 'delivered' %}active{% endif %}">Delivered</a>
+    <a href="{% url 'admin_orders' %}?status=cancelled" class="period-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+  </div>
+</div>
+
+<!-- Status KPIs -->
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;">
+  {% for status, label, color in status_kpis|default:"" %}{% endfor %}
+  <div class="kpi-card" style="padding:16px;border-color:rgba(212,175,95,.2);">
+    <div class="kpi-label">Pending</div>
+    <div class="kpi-value" style="font-size:1.4rem;color:var(--gold);">{{ orders|length }}</div>
+  </div>
+  <div class="kpi-card" style="padding:16px;">
+    <div class="kpi-label">Total</div>
+    <div class="kpi-value" style="font-size:1.4rem;">{{ orders|length }}</div>
+  </div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(129,140,248,.2);">
+    <div class="kpi-label">Revenue</div>
+    <div class="kpi-value" style="font-size:1.2rem;color:var(--gold);">₹0</div>
+  </div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(74,222,128,.2);">
+    <div class="kpi-label">Delivered</div>
+    <div class="kpi-value" style="font-size:1.4rem;color:var(--success);">—</div>
+  </div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(239,68,68,.2);">
+    <div class="kpi-label">Cancelled</div>
+    <div class="kpi-value" style="font-size:1.4rem;color:var(--danger);">—</div>
+  </div>
+</div>
+
+<div class="table-card">
+  <div class="table-hdr">
+    <div class="table-title">{{ orders|length }} Order{% if orders|length != 1 %}s{% endif %}{% if status_filter %} · {{ status_filter|capfirst }}{% endif %}</div>
+    <input type="text" class="table-search" placeholder="Search orders…" oninput="liveSearch(this,'ordersBody')">
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Items</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Update Status</th>
+      </tr>
+    </thead>
+    <tbody id="ordersBody">
+      {% for order in orders %}
+      <tr>
+        <td style="color:var(--white);font-weight:500;">#{{ order.id }}</td>
+        <td>
+          <div style="color:var(--white);">{{ order.user.username }}</div>
+          <div style="font-size:.55rem;color:var(--muted);">{{ order.user.email }}</div>
+        </td>
+        <td style="color:var(--muted);">{{ order.items.count }} item{% if order.items.count != 1 %}s{% endif %}</td>
+        <td style="font-family:var(--font-d);color:var(--gold);font-size:1rem;">₹{{ order.total_price|floatformat:0 }}</td>
+        <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+        <td>{{ order.created_at|date:"d M Y" }}</td>
+        <td>
+          <form method="post" action="{% url 'admin_update_order' order.pk %}" style="display:flex;gap:6px;align-items:center;">
+            {% csrf_token %}
+            <select name="status" style="background:var(--bg3);border:1px solid var(--border);color:var(--white);font-family:var(--font-u);font-size:.55rem;padding:5px 8px;letter-spacing:1px;outline:none;-webkit-appearance:none;">
+              <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+              <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+              <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+              <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+            <button type="submit" class="btn-gold btn-sm">Save</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" style="text-align:center;padding:50px;color:var(--muted);">
+          <div style="font-size:1.8rem;opacity:.2;margin-bottom:12px;">📦</div>
+          No orders found
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% block extra_js %}
+<script>
+function liveSearch(input, tbodyId) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

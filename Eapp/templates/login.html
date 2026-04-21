@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — LUXWATCH{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-wrap">
+    <span class="auth-logo">LUXWATCH</span>
+    <h2 class="auth-heading">Welcome Back</h2>
+    <p class="auth-sub">Sign in to your collector account</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group"><label>Username</label><input type="text" name="username" required placeholder="your_username"></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required placeholder="••••••••"></div>
+      <button type="submit" class="btn-gold" style="width:100%;margin-top:8px;">Sign In</button>
+    </form>
+    <div class="auth-footer">Don't have an account? <a href="{% url 'register' %}">Register</a></div>
+  </div>
+</div>
+{% endblock %}

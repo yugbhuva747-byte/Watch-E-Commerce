@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}{{ watch.name }} — LUXWATCH{% endblock %}
+{% block content %}
+<div class="detail-layout">
+  <!-- IMAGE COLUMN -->
+  <div class="detail-img-wrap">
+    <div class="detail-img-main">
+      {% if watch.image %}
+      <img src="{{ watch.image.url }}" alt="{{ watch.name }}" id="mainImg" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80'">
+      {% else %}
+      <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80" alt="{{ watch.name }}" id="mainImg">
+      {% endif %}
+    </div>
+    <div class="detail-thumbs">
+      {% if watch.image %}
+      <div class="detail-thumb" onclick="swapImg('{{ watch.image.url }}')">
+        <img src="{{ watch.image.url }}" alt="{{ watch.name }}">
+      </div>
+      {% endif %}
+      <!-- Placeholder thumbs for additional angles -->
+      <div class="detail-thumb" onclick="swapImg('https://images.unsplash.com/photo-1509941943102-10c232535736?w=200&q=80')"><img src="https://images.unsplash.com/photo-1509941943102-10c232535736?w=200&q=80" alt="angle 2"></div>
+      <div class="detail-thumb" onclick="swapImg('https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=200&q=80')"><img src="https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=200&q=80" alt="angle 3"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL COLUMN -->
+  <div>
+    <div class="detail-brand">{{ watch.brand }} · {{ watch.get_category_display }}</div>
+    <h1 class="detail-name">{{ watch.name }}</h1>
+    {% if watch.category == 'limited' %}<span class="badge badge-delivered" style="margin-bottom:12px;display:inline-block;">Limited Edition</span>{% endif %}
+    <div class="detail-price">₹{{ watch.price|floatformat:0 }}</div>
+    <p class="detail-desc">{{ watch.description }}</p>
+
+    <div class="detail-specs">
+      {% if watch.material %}<div class="spec-row"><span class="spec-key">Case Material</span><span class="spec-val">{{ watch.material }}</span></div>{% endif %}
+      {% if watch.movement %}<div class="spec-row"><span class="spec-key">Movement</span><span class="spec-val">{{ watch.movement }}</span></div>{% endif %}
+      <div class="spec-row"><span class="spec-key">Category</span><span class="spec-val">{{ watch.get_category_display }}</span></div>
+      <div class="spec-row"><span class="spec-key">Availability</span>
+        <span class="spec-val">
+          {% if watch.stock > 5 %}<span style="color:var(--success);">In Stock ({{ watch.stock }} units)</span>
+          {% elif watch.stock > 0 %}<span style="color:#fb923c;">Low Stock ({{ watch.stock }} left)</span>
+          {% else %}<span style="color:var(--danger);">Sold Out</span>{% endif %}
+        </span>
+      </div>
+      <div class="spec-row"><span class="spec-key">Seller</span><span class="spec-val">{{ watch.seller.username }}</span></div>
+    </div>
+
+    <div class="detail-actions">
+      {% if watch.stock > 0 %}
+      <a href="{% url 'add_to_cart' watch.pk %}" class="btn-gold">Add to Cart</a>
+      {% else %}
+      <button class="btn-gold" disabled style="opacity:.4;cursor:not-allowed;">Sold Out</button>
+      {% endif %}
+      <button class="btn-outline" onclick="this.textContent=this.textContent=='♡ Wishlist'?'♥ Saved':'♡ Wishlist'">♡ Wishlist</button>
+    </div>
+
+    <div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--border);display:flex;gap:24px;font-size:.6rem;color:var(--muted);letter-spacing:1px;">
+      <span>🔒 Secure Checkout</span>
+      <span>📦 Free Delivery</span>
+      <span>↩ 15-Day Returns</span>
+    </div>
+  </div>
+</div>
+
+<!-- RELATED -->
+{% if related %}
+<section class="section bg2">
+  <div class="section-header">
+    <div><span class="section-label">You May Also Like</span><h2 class="section-heading">Related <em>Pieces</em></h2></div>
+    <a href="{% url 'productpage' %}" class="btn-outline">View All</a>
+  </div>
+  <div class="watch-grid">
+    {% for w in related %}
+    <div class="watch-card">
+      <div class="watch-card-img">
+        {% if w.image %}<img src="{{ w.image.url }}" alt="{{ w.name }}" loading="lazy">
+        {% else %}<img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80" alt="{{ w.name }}">{% endif %}
+        <div class="watch-overlay"><a href="{% url 'watch_detail' w.pk %}">View Details →</a></div>
+      </div>
+      <div class="watch-body">
+        <div class="watch-brand">{{ w.brand }}</div>
+        <h3>{{ w.name }}</h3>
+        <div class="watch-footer">
+          <span class="watch-price">₹{{ w.price|floatformat:0 }}</span>
+          <a href="{% url 'add_to_cart' w.pk %}" class="watch-add">+</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- REVIEWS -->
+<section class="reviews-section">
+  <div class="section-header">
+    <div>
+      <span class="section-label">Collector Opinions</span>
+      <h2 class="section-heading">Reviews <em>({{ reviews.count }})</em></h2>
+    </div>
+  </div>
+  {% if reviews %}
+    {% for r in reviews %}
+    <div class="review-card">
+      <div class="review-stars">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+      <p class="review-text">{{ r.comment }}</p>
+      <div class="review-author">{{ r.user.username }} · {{ r.created_at|date:"N j, Y" }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="font-size:.72rem;color:var(--muted);letter-spacing:1px;">No reviews yet. Be the first to review this timepiece.</p>
+  {% endif %}
+</section>
+
+<script>
+function swapImg(src) {
+  const el = document.getElementById('mainImg');
+  el.style.opacity = '0';
+  el.style.transition = 'opacity .3s';
+  setTimeout(() => { el.src = src; el.style.opacity = '1'; }, 300);
+}
+</script>
+{% endblock %}

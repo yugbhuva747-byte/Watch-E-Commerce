@@ -1,0 +1,98 @@
+{% extends 'admin_base.html' %}
+{% block title %}Watch Catalogue — LUXWATCH Admin{% endblock %}
+{% block nav_watches %}active{% endblock %}
+{% block content %}
+<div class="admin-topbar">
+  <div>
+    <div class="admin-section-title">Watch <span>Catalogue</span></div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:4px;letter-spacing:1px;">All watches across all sellers</div>
+  </div>
+  <a href="{% url 'add_watch' %}" class="btn-gold btn-sm">+ Add Watch</a>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+  <div class="kpi-card" style="padding:16px;"><div class="kpi-label">Total Listed</div><div class="kpi-value" style="font-size:1.4rem;">{{ watches|length }}</div></div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(212,175,95,.2);"><div class="kpi-label">Featured</div><div class="kpi-value" style="font-size:1.4rem;color:var(--gold);">—</div></div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(251,146,60,.2);"><div class="kpi-label">Low Stock</div><div class="kpi-value" style="font-size:1.4rem;color:#fb923c;">—</div></div>
+  <div class="kpi-card" style="padding:16px;border-color:rgba(239,68,68,.2);"><div class="kpi-label">Sold Out</div><div class="kpi-value" style="font-size:1.4rem;color:var(--danger);">—</div></div>
+</div>
+
+<div class="table-card">
+  <div class="table-hdr">
+    <div class="table-title">{{ watches|length }} Watches</div>
+    <input type="text" class="table-search" placeholder="Search watches…" oninput="liveSearch(this,'watchBody')">
+  </div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Watch</th>
+        <th>Seller</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Views</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="watchBody">
+      {% for w in watches %}
+      <tr>
+        <td>
+          {% if w.image %}
+          <img src="{{ w.image.url }}" alt="{{ w.name }}" style="width:52px;height:40px;object-fit:cover;background:var(--bg3);" onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:52px;height:40px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1rem;opacity:.3;">⌚</div>
+          {% endif %}
+        </td>
+        <td>
+          <div style="color:var(--white);font-weight:400;">{{ w.name }}</div>
+          <div style="font-size:.55rem;color:var(--muted);">{{ w.brand }}</div>
+        </td>
+        <td>
+          <span style="font-size:.6rem;letter-spacing:1px;color:var(--muted2);">{{ w.seller.username }}</span>
+        </td>
+        <td><span class="badge badge-pending">{{ w.get_category_display }}</span></td>
+        <td style="font-family:var(--font-d);color:var(--gold);font-size:1rem;">₹{{ w.price|floatformat:0 }}</td>
+        <td>
+          <span class="badge badge-{% if w.stock == 0 %}sold{% elif w.stock <= 3 %}low{% else %}live{% endif %}">
+            {{ w.stock }}
+          </span>
+        </td>
+        <td style="color:var(--muted);">{{ w.views_count }}</td>
+        <td>
+          <span class="badge badge-{% if w.is_active %}live{% else %}sold{% endif %}">
+            {% if w.is_active %}Active{% else %}Hidden{% endif %}
+          </span>
+          {% if w.is_featured %}<span class="badge badge-pending" style="margin-left:4px;">★ Featured</span>{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a href="{% url 'edit_watch' w.pk %}" class="btn-outline btn-sm">Edit</a>
+            <a href="{% url 'watch_detail' w.pk %}" class="btn-outline btn-sm">View</a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" style="text-align:center;padding:50px;color:var(--muted);">
+          <div style="font-size:1.8rem;opacity:.2;margin-bottom:12px;">⌚</div>
+          No watches in the catalogue
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% block extra_js %}
+<script>
+function liveSearch(input, tbodyId) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'admin_base.html' %}
+{% block title %}Messages — LUXWATCH Admin{% endblock %}
+{% block nav_messages %}active{% endblock %}
+{% block content %}
+<div class="admin-topbar">
+  <div>
+    <div class="admin-section-title">Contact <span>Messages</span></div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:4px;letter-spacing:1px;">All enquiries from customers</div>
+  </div>
+  <div style="font-size:.6rem;letter-spacing:2px;color:var(--success);">✓ All marked as read</div>
+</div>
+
+<div class="table-card">
+  <div class="table-hdr">
+    <div class="table-title">{{ messages|length }} Message{% if messages|length != 1 %}s{% endif %}</div>
+    <input type="text" class="table-search" placeholder="Search messages…" oninput="liveSearch(this,'msgBody')">
+  </div>
+  {% if messages %}
+  <table class="data-table">
+    <thead>
+      <tr><th>From</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th></tr>
+    </thead>
+    <tbody id="msgBody">
+      {% for msg in messages %}
+      <tr>
+        <td style="color:var(--white);">{{ msg.name }}</td>
+        <td>{{ msg.email }}</td>
+        <td>{{ msg.subject|default:"—" }}</td>
+        <td style="max-width:240px;">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;color:var(--muted2);" title="{{ msg.message }}">{{ msg.message|truncatechars:60 }}</div>
+        </td>
+        <td>{{ msg.created_at|date:"d M Y, H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="text-align:center;padding:60px;color:var(--muted);">
+    <div style="font-size:2.5rem;opacity:.2;margin-bottom:16px;">💬</div>
+    <div style="font-size:.72rem;letter-spacing:1px;">No messages yet</div>
+  </div>
+  {% endif %}
+</div>
+{% block extra_js %}
+<script>
+function liveSearch(input, tbodyId) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#' + tbodyId + ' tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}
