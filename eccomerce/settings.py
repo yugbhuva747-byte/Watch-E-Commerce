@@ -133,3 +133,8 @@ from django.conf.urls.static import static
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://watch-e-commerce-t0of.onrender.com"
+]
